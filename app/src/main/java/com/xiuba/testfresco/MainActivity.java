@@ -1,6 +1,7 @@
 package com.xiuba.testfresco;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Animatable;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import com.facebook.common.executors.UiThreadImmediateExecutorService;
 import com.facebook.common.references.CloseableReference;
 import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.controller.ControllerListener;
 import com.facebook.drawee.drawable.ProgressBarDrawable;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.generic.RoundingParams;
@@ -21,6 +24,7 @@ import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
 import com.facebook.imagepipeline.core.ImagePipeline;
 import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
 import com.facebook.imagepipeline.image.CloseableImage;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequest;
 
 import java.io.File;
@@ -28,6 +32,7 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity {
     private SimpleDraweeView draweeView;
     private ImageView image;
+    private SimpleDraweeView gifView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,9 +80,30 @@ public class MainActivity extends AppCompatActivity {
         //从Fresco中获取已下载的文件
 //        File file = ((FileBinaryResource)Fresco.getImagePipelineFactory().getMainFileCache().getResource(DefaultCacheKeyFactory.getInstance().getEncodedCacheKey(ImageRequest.fromUri(avatar),null))).getFile();
         //得到Fresco的缓存
-        long frescoCache = Fresco.getImagePipelineFactory().getMainFileCache().getSize();
+//        long frescoCache = Fresco.getImagePipelineFactory().getMainFileCache().getSize();
         //清空Fresco中的缓存
-        Fresco.getImagePipelineFactory().getMainFileCache().clearAll();
+//        Fresco.getImagePipelineFactory().getMainFileCache().clearAll();
+
+
+
+        //GIF 相关
+        gifView = (SimpleDraweeView) findViewById(R.id.gifView);
+        ControllerListener controllerListener = new BaseControllerListener<ImageInfo>(){
+            @Override
+            public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                super.onFinalImageSet(id, imageInfo, animatable);
+                if (animatable!=null){
+                    animatable.start();
+                }
+            }
+        };
+        DraweeController controller11 = Fresco.newDraweeControllerBuilder()
+                //设置URI
+                .setUri("http://img4.imgtn.bdimg.com/it/u=388217056,473241222&fm=21&gp=0.jpg")
+                .setAutoPlayAnimations(false)//设置加载完后自动播放
+                .setControllerListener(controllerListener)//设置监听器
+                .build();//设置自动播放
+        gifView.setController(controller11);
 
     }
 }
